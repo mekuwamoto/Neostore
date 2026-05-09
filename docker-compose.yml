@@ -1,14 +1,14 @@
 version: '3.8'
 services:
   ministack:
-    image: localstack/localstack:latest
+    image: ministackorg/ministack:latest
     ports:
       - "4566:4566"
     environment:
       - SERVICES=s3,dynamodb,lambda,rds
       - DEBUG=1
     volumes:
-      - "./.localstack:/var/lib/localstack"
+      - "./.ministack:/var/lib/ministack"
       - "/var/run/docker.sock:/var/run/docker.sock"
 
   mariadb:
