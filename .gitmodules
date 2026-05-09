@@ -1,0 +1,6 @@
+[submodule "Neostore-front"]
+	path = Neostore-front
+	url = https://github.com/mekuwamoto/Neostore-front
+[submodule "Neostore-back"]
+	path = Neostore-back
+	url = https://github.com/mekuwamoto/Neostore-back.git
