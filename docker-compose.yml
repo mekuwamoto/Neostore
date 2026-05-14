@@ -1,35 +1,61 @@
 version: '3.8'
+
 services:
   ministack:
     image: ministackorg/ministack:latest
+    container_name: ministack
+    restart: unless-stopped
+
     ports:
       - "4566:4566"
+
     environment:
-      - SERVICES=s3,dynamodb,lambda,rds
-      - DEBUG=1
+      SERVICES: s3,dynamodb,lambda
+
+      LOG_LEVEL: INFO
+
+      # Persistência do estado interno
+      PERSIST_STATE: 1
+
+      # Persistência dos arquivos S3
+      S3_PERSIST: 1
+
+      # Diretórios internos
+      STATE_DIR: /tmp/ministack-state
+      S3_DATA_DIR: /tmp/ministack-data/s3
+
     volumes:
-      - "./.ministack:/var/lib/ministack"
-      - "/var/run/docker.sock:/var/run/docker.sock"
+      # Estado dos serviços
+      - ./.ministack/state:/tmp/ministack-state
+
+      # Arquivos reais do S3
+      - ./.ministack/s3:/tmp/ministack-data/s3
+
+      # Necessário para lambda/rds/etc
+      - /var/run/docker.sock:/var/run/docker.sock
+
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:4566/_ministack/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   mariadb:
     image: mariadb:10.6
+    container_name: neostore-mariadb
     restart: unless-stopped
+
     environment:
       MYSQL_ROOT_PASSWORD: example
       MYSQL_DATABASE: neostore
       MYSQL_USER: neo
       MYSQL_PASSWORD: neopass
+
     ports:
       - "3306:3306"
+
     volumes:
       - mariadb-data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
 volumes:
   mariadb-data:
-  .localstack:
-    driver: local
